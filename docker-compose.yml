@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: dental-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: digitalschool
+      POSTGRES_MULTIPLE_DATABASES: doctordb,patientdb,appointmentdb,medicaldb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    networks:
+      - dental-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: dental-pgadmin
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - "8085:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@dentalclinic.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - dental-network
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+
+networks:
+  dental-network:
+    driver: bridge
