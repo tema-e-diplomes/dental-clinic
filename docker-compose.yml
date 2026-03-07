@@ -1,0 +1,34 @@
+services:
+  # Postgres Configuration
+  postgres:
+    image: postgres:17.4
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - dspostgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=digitalschool
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      retries: 5
+    networks:
+      - dentalclient
+
+  # PgAdmin Configuration
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    ports:
+      - "85:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=drilo2020@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=drilon
+      - PGADMIN_MAX_LOGIN_ATTEMPTS=10
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    restart: always
+    networks:
+      - dentalclient
