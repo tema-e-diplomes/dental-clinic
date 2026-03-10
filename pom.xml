@@ -16,8 +16,8 @@
   <description>Microservices architecture for a dental clinic</description>
 
   <modules>
-      <!-- <module>service-registry</module>
-       <module>api-gateway</module> -->
+       <module>service-registry</module>
+       <module>api-gateway</module>
        <module>doctor-service</module>
        <module>patient-service</module>
        <module>appointment-service</module>
