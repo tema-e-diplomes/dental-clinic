@@ -4,26 +4,34 @@ server:
 spring:
   application:
     name: api-gateway
-
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedOriginPatterns: "http://localhost:5173"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
       routes:
-
         - id: doctor-service
           uri: lb://doctor-service
           predicates:
             - Path=/doctor/**
-
         - id: patient-service
           uri: lb://patient-service
           predicates:
             - Path=/patient/**
-
         - id: appointment-service
           uri: lb://appointment-service
           predicates:
             - Path=/appointment/**
-
         - id: medical-record-service
           uri: lb://medical-record-service
           predicates:
