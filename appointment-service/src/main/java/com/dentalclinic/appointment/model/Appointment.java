@@ -23,5 +23,5 @@ public class Appointment {
     private UUID doctorId;
     private LocalDateTime appointmentTime;
     private String reason;
-    private String status;
+    private String status; // SCHEDULED, COMPLETED, CANCELLED
 }
