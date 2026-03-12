@@ -38,14 +38,42 @@ const Dashboard = () => {
             <div className="dashboard-grid">
                 <div className="premium-card">
                     <h3>Recent Appointments</h3>
-                    <div className="empty-state">
-                        <p className="text-muted">No recent appointments found.</p>
+                    <div className="appointment-list">
+                        {appointments.slice(0, 5).length > 0 ? (
+                            appointments.slice(0, 5).map((app, idx) => (
+                                <div key={idx} className="appointment-item">
+                                    <div className="app-info">
+                                        <span className="app-patient">{app.patientName}</span>
+                                        <span className="app-date">{new Date(app.appointmentTime).toLocaleString()}</span>
+                                    </div>
+                                    <span className={`status-badge ${app.status?.toLowerCase()}`}>{app.status}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="empty-state">
+                                <p className="text-muted">No recent appointments found.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="premium-card">
                     <h3>Upcoming Schedule</h3>
-                    <div className="empty-state">
-                        <p className="text-muted">No upcoming schedules.</p>
+                    <div className="schedule-list">
+                        {appointments.filter(a => new Date(a.appointmentTime) > new Date()).slice(0, 5).length > 0 ? (
+                            appointments.filter(a => new Date(a.appointmentTime) > new Date()).slice(0, 5).map((app, idx) => (
+                                <div key={idx} className="schedule-item">
+                                    <div className="item-dot" style={{ backgroundColor: '#3b82f6' }}></div>
+                                    <div className="item-details">
+                                        <span className="item-time">{new Date(app.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                        <span className="item-title">{app.reason || 'General Checkup'}</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="empty-state">
+                                <p className="text-muted">No upcoming schedules.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
