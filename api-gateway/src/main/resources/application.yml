@@ -6,10 +6,6 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
       globalcors:
         add-to-simple-url-handler-mapping: true
         cors-configurations:
@@ -21,23 +17,24 @@ spring:
             allowCredentials: true
       routes:
         - id: doctor-service
-          uri: lb://doctor-service
+          uri: ${DOCTOR_SERVICE_URL:http://doctor-service:8081}
           predicates:
             - Path=/doctor/**
         - id: patient-service
-          uri: lb://patient-service
+          uri: ${PATIENT_SERVICE_URL:http://patient-service:8082}
           predicates:
             - Path=/patient/**
         - id: appointment-service
-          uri: lb://appointment-service
+          uri: ${APPOINTMENT_SERVICE_URL:http://appointment-service:8083}
           predicates:
             - Path=/appointment/**
         - id: medical-record-service
-          uri: lb://medical-record-service
+          uri: ${MEDICAL_RECORD_SERVICE_URL:http://medical-record-service:8084}
           predicates:
             - Path=/medical-record/**
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER:http://localhost:8085/auth/realms/dental-clinic}
+          jwk-set-uri: ${KEYCLOAK_JWKS:http://keycloak:8080/auth/realms/dental-clinic/protocol/openid-connect/certs}
