@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchPatients, addPatient } from '../features/patientsSlice';
-import { Plus, Search, User, Mail, Phone, Calendar, Hash } from 'lucide-react';
+import { fetchPatients, addPatient, updatePatient, deletePatient } from '../features/patientsSlice';
+import { Plus, Search, User, Mail, Phone, Calendar, Hash, Pencil, Trash2 } from 'lucide-react';
 
 const Patients = () => {
     const dispatch = useDispatch();
     const { items: patients, status } = useSelector((state) => state.patients);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentPatientId, setCurrentPatientId] = useState(null);
     const [filter, setFilter] = useState('');
     const [newPatient, setNewPatient] = useState({
         firstName: '',
@@ -25,9 +27,39 @@ const Patients = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        dispatch(addPatient(newPatient));
+        if (isEditing) {
+            dispatch(updatePatient({ id: currentPatientId, patient: newPatient }));
+        } else {
+            dispatch(addPatient(newPatient));
+        }
+        closeModal();
+    };
+
+    const handleEdit = (patient) => {
+        setNewPatient({
+            firstName: patient.firstName,
+            lastName: patient.lastName,
+            dateOfBirth: patient.dateOfBirth,
+            gender: patient.gender,
+            phone: patient.phone,
+            email: patient.email
+        });
+        setCurrentPatientId(patient.id);
+        setIsEditing(true);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = (id) => {
+        if (window.confirm('Are you sure you want to delete this patient?')) {
+            dispatch(deletePatient(id));
+        }
+    };
+
+    const closeModal = () => {
         setIsModalOpen(false);
+        setIsEditing(false);
         setNewPatient({ firstName: '', lastName: '', dateOfBirth: '', gender: 'OTHER', phone: '', email: '' });
+        setCurrentPatientId(null);
     };
 
     const filteredPatients = patients.filter(p =>
@@ -94,7 +126,14 @@ const Patients = () => {
                                     </span>
                                 </td>
                                 <td style={{ padding: '1.25rem' }}>
-                                    <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>View Profile</button>
+                                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                        <button className="icon-btn" onClick={() => handleEdit(patient)} title="Edit">
+                                            <Pencil size={18} />
+                                        </button>
+                                        <button className="icon-btn" style={{ color: 'var(--error)' }} onClick={() => handleDelete(patient.id)} title="Delete">
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -105,7 +144,7 @@ const Patients = () => {
             {isModalOpen && (
                 <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                     <div className="premium-card modal-content" style={{ width: '100%', maxWidth: '600px' }}>
-                        <h3>Register New Patient</h3>
+                        <h3>{isEditing ? 'Edit Patient' : 'Register New Patient'}</h3>
                         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1.5rem' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div className="form-group">
@@ -172,8 +211,8 @@ const Patients = () => {
                                 />
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="btn-primary">Register Patient</button>
+                                <button type="button" className="btn-secondary" onClick={closeModal}>Cancel</button>
+                                <button type="submit" className="btn-primary">{isEditing ? 'Save Changes' : 'Register Patient'}</button>
                             </div>
                         </form>
                     </div>
