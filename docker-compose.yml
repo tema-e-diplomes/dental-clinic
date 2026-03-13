@@ -1,11 +1,14 @@
 services:
+  # -------------------------
+  # Database
+  # -------------------------
   postgres:
     image: postgres:16
     container_name: dental-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: digitalschool
-      POSTGRES_MULTIPLE_DATABASES: doctordb,patientdb,appointmentdb,medicaldb
+      POSTGRES_MULTIPLE_DATABASES: doctordb,patientdb,appointmentdb,medicaldb,keycloak
     ports:
       - "5432:5432"
     volumes:
@@ -21,7 +24,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - "8085:80"
+      - "8089:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@dentalclinic.com
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -30,9 +33,13 @@ services:
       - pgadmin-data:/var/lib/pgadmin
     networks:
       - dental-network
+
+  # -------------------------
+  # Identity & Auth
+  # -------------------------
   keycloak:
     image: quay.io/keycloak/keycloak:26.1
-    restart: unless-stopped
+    container_name: keycloak
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
@@ -40,8 +47,10 @@ services:
       KC_DB_PASSWORD: digitalschool
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8085:8080"
     command: >
-      start
+      start-dev
       --http-enabled=true
       --proxy-headers=xforwarded
       --hostname-strict=false
@@ -54,10 +63,111 @@ services:
       - postgres
     networks:
       - dental-network
-volumes:
-  postgres-data:
-  pgadmin-data:
 
+  # -------------------------
+  # API Gateway
+  # -------------------------
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - DOCTOR_SERVICE_URL=http://doctor-service:8081
+      - PATIENT_SERVICE_URL=http://patient-service:8082
+      - APPOINTMENT_SERVICE_URL=http://appointment-service:8083
+      - MEDICAL_RECORD_SERVICE_URL=http://medical-record-service:8084
+    depends_on:
+      - doctor-service
+      - patient-service
+      - appointment-service
+      - medical-record-service
+    networks:
+      - dental-network
+
+  # -------------------------
+  # Microservices
+  # -------------------------
+  doctor-service:
+    build:
+      context: .
+      dockerfile: doctor-service/Dockerfile
+    container_name: doctor-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/doctordb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: digitalschool
+    depends_on:
+      - postgres
+    networks:
+      - dental-network
+
+  patient-service:
+    build:
+      context: .
+      dockerfile: patient-service/Dockerfile
+    container_name: patient-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/patientdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: digitalschool
+    depends_on:
+      - postgres
+    networks:
+      - dental-network
+
+  appointment-service:
+    build:
+      context: .
+      dockerfile: appointment-service/Dockerfile
+    container_name: appointment-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/appointmentdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: digitalschool
+    depends_on:
+      - postgres
+    networks:
+      - dental-network
+
+  medical-record-service:
+    build:
+      context: .
+      dockerfile: medical-record-service/Dockerfile
+    container_name: medical-record-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medicaldb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: digitalschool
+    depends_on:
+      - postgres
+    networks:
+      - dental-network
+
+  # -------------------------
+  # Frontend
+  # -------------------------
+  frontend:
+    build:
+      context: ./dental-clinic-frontend
+      dockerfile: Dockerfile
+    container_name: dental-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - dental-network
+
+# -------------------------
+# Networks & Volumes
+# -------------------------
 networks:
   dental-network:
     driver: bridge
+
+volumes:
+  postgres-data:
+  pgadmin-data:

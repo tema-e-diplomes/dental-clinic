@@ -9,7 +9,7 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>com.dentalclinic</groupId>
-  <artifactId>dental-clinic-microservices</artifactId>
+  <artifactId>dental-clinic</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>dental-clinic</name>

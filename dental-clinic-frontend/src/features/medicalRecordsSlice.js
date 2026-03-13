@@ -16,6 +16,16 @@ export const addMedicalRecord = createAsyncThunk('medicalRecords/addMedicalRecor
     return response.data;
 });
 
+export const updateMedicalRecord = createAsyncThunk('medicalRecords/updateMedicalRecord', async ({ id, record }) => {
+    const response = await api.put(`/medical-record/${id}`, record);
+    return response.data;
+});
+
+export const deleteMedicalRecord = createAsyncThunk('medicalRecords/deleteMedicalRecord', async (id) => {
+    await api.delete(`/medical-record/${id}`);
+    return id;
+});
+
 const medicalRecordsSlice = createSlice({
     name: 'medicalRecords',
     initialState: {
@@ -43,6 +53,15 @@ const medicalRecordsSlice = createSlice({
             })
             .addCase(addMedicalRecord.fulfilled, (state, action) => {
                 state.items.push(action.payload);
+            })
+            .addCase(updateMedicalRecord.fulfilled, (state, action) => {
+                const index = state.items.findIndex(r => r.id === action.payload.id);
+                if (index !== -1) {
+                    state.items[index] = action.payload;
+                }
+            })
+            .addCase(deleteMedicalRecord.fulfilled, (state, action) => {
+                state.items = state.items.filter(r => r.id !== action.payload);
             });
     },
 });

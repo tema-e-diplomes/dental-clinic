@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDoctors, addDoctor } from '../features/doctorsSlice';
-import { Plus, Search, UserRound, Mail, Phone, MapPin } from 'lucide-react';
+import { fetchDoctors, addDoctor, updateDoctor, deleteDoctor } from '../features/doctorsSlice';
+import { Plus, Search, UserRound, Mail, Phone, MapPin, Trash2, Pencil } from 'lucide-react';
 
 const Doctors = () => {
     const dispatch = useDispatch();
     const { items: doctors, status } = useSelector((state) => state.doctors);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentDoctorId, setCurrentDoctorId] = useState(null);
     const [newDoctor, setNewDoctor] = useState({ firstName: '', lastName: '', specialty: '', licenseNumber: '', email: '' });
 
     useEffect(() => {
@@ -17,9 +19,38 @@ const Doctors = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        dispatch(addDoctor(newDoctor));
+        if (isEditing) {
+            dispatch(updateDoctor({ id: currentDoctorId, doctor: newDoctor }));
+        } else {
+            dispatch(addDoctor(newDoctor));
+        }
+        closeModal();
+    };
+
+    const handleEdit = (doctor) => {
+        setNewDoctor({
+            firstName: doctor.firstName,
+            lastName: doctor.lastName,
+            specialty: doctor.specialty,
+            licenseNumber: doctor.licenseNumber,
+            email: doctor.email
+        });
+        setCurrentDoctorId(doctor.id);
+        setIsEditing(true);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = (id) => {
+        if (window.confirm('Are you sure you want to delete this doctor?')) {
+            dispatch(deleteDoctor(id));
+        }
+    };
+
+    const closeModal = () => {
         setIsModalOpen(false);
+        setIsEditing(false);
         setNewDoctor({ firstName: '', lastName: '', specialty: '', licenseNumber: '', email: '' });
+        setCurrentDoctorId(null);
     };
 
     return (
@@ -37,13 +68,23 @@ const Doctors = () => {
             <div className="doctors-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
                 {doctors.map((doctor) => (
                     <div key={doctor.id} className="premium-card doctor-card">
-                        <div className="doctor-info-main" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                            <div className="doctor-avatar" style={{ width: '50px', height: '50px', background: '#e0e7ff', color: '#4338ca', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }}>
-                                <UserRound size={28} />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                            <div className="doctor-info-main" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <div className="doctor-avatar" style={{ width: '50px', height: '50px', background: '#e0e7ff', color: '#4338ca', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }}>
+                                    <UserRound size={28} />
+                                </div>
+                                <div>
+                                    <h4 style={{ margin: 0 }}>Dr. {doctor.firstName} {doctor.lastName}</h4>
+                                    <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>{doctor.specialty}</span>
+                                </div>
                             </div>
-                            <div>
-                                <h4 style={{ margin: 0 }}>Dr. {doctor.firstName} {doctor.lastName}</h4>
-                                <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>{doctor.specialty}</span>
+                            <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                <button className="icon-btn" onClick={() => handleEdit(doctor)} title="Edit">
+                                    <Pencil size={18} />
+                                </button>
+                                <button className="icon-btn" style={{ color: 'var(--error)' }} onClick={() => handleDelete(doctor.id)} title="Delete">
+                                    <Trash2 size={18} />
+                                </button>
                             </div>
                         </div>
                         <div className="doctor-details" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
@@ -57,7 +98,7 @@ const Doctors = () => {
             {isModalOpen && (
                 <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                     <div className="premium-card modal-content" style={{ width: '100%', maxWidth: '500px' }}>
-                        <h3>Add New Doctor</h3>
+                        <h3>{isEditing ? 'Edit Doctor' : 'Add New Doctor'}</h3>
                         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <input
@@ -96,14 +137,14 @@ const Doctors = () => {
                                 onChange={(e) => setNewDoctor({ ...newDoctor, email: e.target.value })}
                             />
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="btn-primary">Save Doctor</button>
+                                <button type="button" className="btn-secondary" onClick={closeModal}>Cancel</button>
+                                <button type="submit" className="btn-primary">{isEditing ? 'Save Changes' : 'Save Doctor'}</button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
-        </div>
+        </div >
     );
 };
 

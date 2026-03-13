@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMedicalRecords, addMedicalRecord } from '../features/medicalRecordsSlice';
+import { fetchMedicalRecords, addMedicalRecord, updateMedicalRecord, deleteMedicalRecord } from '../features/medicalRecordsSlice';
 import { fetchPatients } from '../features/patientsSlice';
-import { FileText, Plus, Search, User, Clipboard, FileType, Calendar } from 'lucide-react';
+import { FileText, Plus, Search, User, Clipboard, FileType, Calendar, Pencil, Trash2 } from 'lucide-react';
 
 const MedicalRecords = () => {
     const dispatch = useDispatch();
     const { items: records, status } = useSelector((state) => state.medicalRecords);
     const { items: patients } = useSelector((state) => state.patients);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentRecordId, setCurrentRecordId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [newRecord, setNewRecord] = useState({
         patientId: '',
@@ -24,9 +26,37 @@ const MedicalRecords = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        dispatch(addMedicalRecord(newRecord));
+        if (isEditing) {
+            dispatch(updateMedicalRecord({ id: currentRecordId, record: newRecord }));
+        } else {
+            dispatch(addMedicalRecord(newRecord));
+        }
+        closeModal();
+    };
+
+    const handleEdit = (record) => {
+        setNewRecord({
+            patientId: record.patientId,
+            diagnosis: record.diagnosis,
+            treatment: record.treatment,
+            notes: record.notes || ''
+        });
+        setCurrentRecordId(record.id);
+        setIsEditing(true);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = (id) => {
+        if (window.confirm('Are you sure you want to delete this medical record?')) {
+            dispatch(deleteMedicalRecord(id));
+        }
+    };
+
+    const closeModal = () => {
         setIsModalOpen(false);
+        setIsEditing(false);
         setNewRecord({ patientId: '', diagnosis: '', treatment: '', notes: '' });
+        setCurrentRecordId(null);
     };
 
     const getPatientName = (id) => {
@@ -79,6 +109,14 @@ const MedicalRecords = () => {
                                     </span>
                                 </div>
                             </div>
+                            <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                <button className="icon-btn" onClick={() => handleEdit(record)} title="Edit">
+                                    <Pencil size={18} />
+                                </button>
+                                <button className="icon-btn" style={{ color: 'var(--error)' }} onClick={() => handleDelete(record.id)} title="Delete">
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="record-content" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '0.5rem' }}>
@@ -109,7 +147,7 @@ const MedicalRecords = () => {
             {isModalOpen && (
                 <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                     <div className="premium-card modal-content" style={{ width: '100%', maxWidth: '600px' }}>
-                        <h3>Add Medical Record</h3>
+                        <h3>{isEditing ? 'Edit Medical Record' : 'Add Medical Record'}</h3>
                         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1.5rem' }}>
                             <div className="form-group">
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem' }}>Patient</label>
@@ -117,6 +155,7 @@ const MedicalRecords = () => {
                                     required
                                     value={newRecord.patientId}
                                     onChange={(e) => setNewRecord({ ...newRecord, patientId: e.target.value })}
+                                    disabled={isEditing}
                                 >
                                     <option value="">Select Patient</option>
                                     {patients.map(p => (
@@ -154,8 +193,8 @@ const MedicalRecords = () => {
                                 />
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="btn-primary">Save Record</button>
+                                <button type="button" className="btn-secondary" onClick={closeModal}>Cancel</button>
+                                <button type="submit" className="btn-primary">{isEditing ? 'Save Changes' : 'Save Record'}</button>
                             </div>
                         </form>
                     </div>
