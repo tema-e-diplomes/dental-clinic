@@ -3,7 +3,7 @@ services:
   # Database
   # -------------------------
   postgres:
-    image: postgres:16
+    image: postgres:16s
     container_name: dental-postgres
     environment:
       POSTGRES_USER: postgres
@@ -68,7 +68,7 @@ services:
   # API Gateway
   # -------------------------
   api-gateway:
-    image: ghcr.io/tema-e-diplomes/dental-clinic/api-gateway:sha-69ed123
+    image: ghcr.io/tema-e-diplomes/dental-clinic/api-gateway:latest
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -89,7 +89,7 @@ services:
   # Microservices
   # -------------------------
   doctor-service:
-    image: ghcr.io/tema-e-diplomes/dental-clinic/doctor-service:sha-69ed123
+    image: ghcr.io/tema-e-diplomes/dental-clinic/doctor-service:latest
     container_name: doctor-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/doctordb
@@ -101,7 +101,7 @@ services:
       - dental-network
 
   patient-service:
-    image: ghcr.io/tema-e-diplomes/dental-clinic/patient-service:sha-69ed123
+    image: ghcr.io/tema-e-diplomes/dental-clinic/patient-service:latest
     container_name: patient-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/patientdb
@@ -113,7 +113,7 @@ services:
       - dental-network
 
   appointment-service:
-    image: ghcr.io/tema-e-diplomes/dental-clinic/appointment-service:sha-69ed123
+    image: ghcr.io/tema-e-diplomes/dental-clinic/appointment-service:latest
     container_name: appointment-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/appointmentdb
@@ -125,7 +125,7 @@ services:
       - dental-network
 
   medical-record-service:
-    image: ghcr.io/tema-e-diplomes/dental-clinic/medical-record-service:sha-69ed123
+    image: ghcr.io/tema-e-diplomes/dental-clinic/medical-record-service:latest
     container_name: medical-record-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medicaldb
@@ -140,7 +140,7 @@ services:
   # Frontend
   # -------------------------
   frontend:
-    image: ghcr.io/tema-e-diplomes/dental-clinic/dental-clinic-frontend:sha-69ed123
+    image: ghcr.io/tema-e-diplomes/dental-clinic/dental-clinic-frontend:latest
     container_name: dental-frontend
     ports:
       - "5173:80"
