@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    io.kompose.service: appointment-service
+    app: appointment-service
   name: appointment-service
 spec:
   ports:
@@ -10,4 +10,4 @@ spec:
       port: 8083
       targetPort: 8083
   selector:
-    io.kompose.service: appointment-service
+    app: appointment-service

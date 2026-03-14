@@ -4,7 +4,7 @@ metadata:
   name: doctor-service     
 spec:
   selector:
-    io.kompose.service: doctor-service       
+    app: doctor-service       
   ports:
     - protocol: TCP
       port: 8081            

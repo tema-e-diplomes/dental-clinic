@@ -2,19 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    io.kompose.service: keycloak
+    app: keycloak
   name: keycloak
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: keycloak
+      app: keycloak
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: keycloak
+        app: keycloak
     spec:
       containers:
         - args:
