@@ -1,0 +1,43 @@
+name: CD to Minikube
+
+on:
+  push:
+    branches:
+      - main
+      - cd-minikube
+  workflow_dispatch:
+
+jobs:
+  deploy-minikube:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Minikube
+        uses: medyagh/setup-minikube@latest
+
+      - name: Deploy Manifests
+        run: |
+          # Apply secret first
+          kubectl apply -f k8s-manifests/ghcr-secret.yaml || true
+          
+          # Apply everything else
+          kubectl apply -f k8s-manifests/
+          
+      - name: Wait for Deployments
+        run: |
+          kubectl rollout status deployment/postgres --timeout=90s
+          kubectl rollout status deployment/keycloak --timeout=90s
+          kubectl rollout status deployment/api-gateway --timeout=90s
+          kubectl rollout status deployment/frontend --timeout=90s
+          kubectl rollout status deployment/doctor-service --timeout=90s
+          kubectl rollout status deployment/patient-service --timeout=90s
+          kubectl rollout status deployment/appointment-service --timeout=90s
+          kubectl rollout status deployment/medical-record-service --timeout=90s
+
+      - name: Get Cluster Status
+        run: |
+          kubectl get pods -o wide
+          kubectl get svc
+          kubectl get deployments
