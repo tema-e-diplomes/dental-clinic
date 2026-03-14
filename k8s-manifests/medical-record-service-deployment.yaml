@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: medical-record-service
+  name: medical-record-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medical-record-service
+  template:
+    metadata:
+      labels:
+        app: medical-record-service
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - env:
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: digitalschool
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/medicaldb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+          image: ghcr.io/tema-e-diplomes/dental-clinic/medical-record-service:latest
+          name: medical-record-service
+          ports:
+            - containerPort: 8084
+              protocol: TCP
+      restartPolicy: Always
