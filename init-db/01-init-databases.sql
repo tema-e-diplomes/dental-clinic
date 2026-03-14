@@ -1,0 +1,5 @@
+CREATE DATABASE doctordb;
+CREATE DATABASE patientdb;
+CREATE DATABASE appointmentdb;
+CREATE DATABASE medicaldb;
+CREATE DATABASE keycloak;
