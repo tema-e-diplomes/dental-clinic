@@ -40,3 +40,6 @@ Thumbs.db
 .idea/
 *.iml
 out/
+
+# Kubernetes secrets
+k8s-manifests/ghcr-secret.yaml
