@@ -91,6 +91,8 @@ services:
   doctor-service:
     image: ghcr.io/tema-e-diplomes/dental-clinic/doctor-service:latest
     container_name: doctor-service
+    ports:
+      - "8081:8081"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/doctordb
       SPRING_DATASOURCE_USERNAME: postgres
@@ -103,6 +105,8 @@ services:
   patient-service:
     image: ghcr.io/tema-e-diplomes/dental-clinic/patient-service:latest
     container_name: patient-service
+    ports:
+      - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/patientdb
       SPRING_DATASOURCE_USERNAME: postgres
@@ -115,6 +119,8 @@ services:
   appointment-service:
     image: ghcr.io/tema-e-diplomes/dental-clinic/appointment-service:latest
     container_name: appointment-service
+    ports:
+      - "8083:8083"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/appointmentdb
       SPRING_DATASOURCE_USERNAME: postgres
@@ -127,6 +133,8 @@ services:
   medical-record-service:
     image: ghcr.io/tema-e-diplomes/dental-clinic/medical-record-service:latest
     container_name: medical-record-service
+    ports:
+      - "8084:8084"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medicaldb
       SPRING_DATASOURCE_USERNAME: postgres

@@ -9,5 +9,5 @@ RUN mvn -f doctor-service/pom.xml clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/doctor-service/target/*.jar app.jar
-EXPOSE 8082
+EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
