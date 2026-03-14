@@ -9,5 +9,5 @@ RUN mvn -f medical-record-service/pom.xml clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/medical-record-service/target/*.jar app.jar
-EXPOSE 8083
+EXPOSE 8084
 ENTRYPOINT ["java", "-jar", "app.jar"]
