@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: keycloak
+  name: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: keycloak
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: keycloak
+    spec:
+      containers:
+        - args:
+            - start-dev
+            - --http-enabled=true
+            - --proxy-headers=xforwarded
+            - --hostname-strict=false
+            - --http-relative-path=/auth
+            - --hostname=localhost
+            - --import-realm
+          env:
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_PASSWORD
+              value: digitalschool
+            - name: KC_DB_URL
+              value: jdbc:postgresql://postgres:5432/keycloak
+            - name: KC_DB_USERNAME
+              value: postgres
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin
+          image: quay.io/keycloak/keycloak:26.1
+          name: keycloak
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /opt/keycloak/data/import
+              name: keycloak-cm0
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            name: keycloak-cm0
+          name: keycloak-cm0

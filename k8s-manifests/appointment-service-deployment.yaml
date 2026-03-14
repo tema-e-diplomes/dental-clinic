@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: appointment-service
+  name: appointment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: appointment-service
+  template:
+    metadata:
+      labels:
+        io.kompose.service: appointment-service
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - env:
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: digitalschool
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/appointmentdb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+          image: ghcr.io/tema-e-diplomes/dental-clinic/appointment-service:latest
+          name: appointment-service
+          ports:
+            - containerPort: 8083
+              protocol: TCP
+      restartPolicy: Always
