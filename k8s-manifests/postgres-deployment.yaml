@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: postgres
   labels:
     app: postgres
-  name: postgres
 spec:
   replicas: 1
   selector:
@@ -17,28 +17,25 @@ spec:
         app: postgres
     spec:
       containers:
-        - env:
-            - name: POSTGRES_MULTIPLE_DATABASES
-              value: doctordb,patientdb,appointmentdb,medicaldb,keycloak
-            - name: POSTGRES_PASSWORD
-              value: digitalschool
-            - name: POSTGRES_USER
-              value: postgres
+        - name: postgres
           image: postgres:16
-          name: postgres
           ports:
             - containerPort: 5432
-              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: digitalschool
+            - name: POSTGRES_MULTIPLE_DATABASES
+              value: doctordb,patientdb,appointmentdb,medicaldb,keycloak
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: postgres-data
-            - mountPath: /docker-entrypoint-initdb.d
-              name: postgres-cm1
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data/pgdata
+              subPath: pgdata
       restartPolicy: Always
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-data
-        - configMap:
-            name: postgres-cm1
-          name: postgres-cm1
